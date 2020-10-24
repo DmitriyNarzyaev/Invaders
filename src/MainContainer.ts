@@ -1,16 +1,27 @@
 import Container = PIXI.Container;
-import { Graphics } from "pixi.js";
+import { Graphics, Loader, Sprite } from "pixi.js";
 
 export default class MainContainer extends Container {
 	public static readonly WIDTH:number = 1000;
 	public static readonly HEIGHT:number = 600;
+	private _background:Sprite;
 
 	constructor() {
 		super();
+		this.pictureLoader();
+	}
 
-		let background: Graphics = new Graphics;
-		background.beginFill(0x00ff48);
-		background.drawRect(0, 0, MainContainer.WIDTH, MainContainer.HEIGHT);
-		this.addChild(background);
+	private pictureLoader():void {
+        const loader:Loader = new Loader();
+		loader.add("background", "nightCityBackground.png");
+		loader.on("complete", ()=> {
+			this.initialBackground();
+		});
+		loader.load();
+	}
+
+	private initialBackground():void {
+		this._background = Sprite.from("background");
+		this.addChild(this._background);
 	}
 }
