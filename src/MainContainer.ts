@@ -1,6 +1,7 @@
 import Container = PIXI.Container;
 import { Loader, Sprite } from "pixi.js";
 import Personage from "./Personage";
+import Button from "./Button";
 
 export default class MainContainer extends Container {
 	public static readonly WIDTH:number = 1000;
@@ -13,6 +14,7 @@ export default class MainContainer extends Container {
 	private _json:ILevel;
 	private _jsonIsLoaded:Boolean;
 	private _backgroundIsLoaded:Boolean;
+	private _button:Button;
 
 	constructor() {
 		super();
@@ -23,6 +25,7 @@ export default class MainContainer extends Container {
 	private pictureLoader():void {
         const loader:Loader = new Loader();
 		loader.add("background", "nightCityBackground.png");
+		loader.add("title", "title.png");
 		loader.on("complete", ()=> {
 			this._backgroundIsLoaded = true;
 			this.checkLoadingsAndTryToStart();
@@ -50,15 +53,37 @@ export default class MainContainer extends Container {
 
 	private checkLoadingsAndTryToStart():void {
 		if (this._backgroundIsLoaded && this._jsonIsLoaded) {
-			this.initialBackground();
-			this.initialInvaders();
-			this.initialPlayer();
+			this.initialStartTitle();
 		}
 	}
 
-	private initialBackground():void {
-		this._background = Sprite.from("background");
+	private initialStartTitle():void {
+		this.initialBackground("title");
+		this.initialButton("START");
+	}
+
+	private initialBackground(pictureName:string):void {
+		this._background = Sprite.from(pictureName);
 		this.addChild(this._background);
+	}
+
+	private removeBackground():void {
+		this.removeChild(this._background);
+		this.removeChild(this._button);
+	}
+
+	private initialButton(buttonName:string):void {
+		this._button = new Button(buttonName, () => {this.initialGame();});
+		this.addChild(this._button);
+		this._button.x = (MainContainer.WIDTH - this._button.width)/2;
+		this._button.y = MainContainer.HEIGHT - this._button.height*2;
+	}
+
+	private initialGame():void {
+		this.removeBackground();
+		this.initialBackground("background");
+		this.initialInvaders();
+		this.initialPlayer();
 	}
 
 	private initialInvaders():void {
