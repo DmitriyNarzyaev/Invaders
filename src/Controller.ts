@@ -12,6 +12,7 @@ export default class Controller extends Container {
 	private _shotSwitcher:boolean = false;
     private _shotSpeed:number = 5;
     private _iterator:number = 0;
+    private _invaderOrientation:number = 10;
 
 	constructor() {
         super();
@@ -97,6 +98,18 @@ export default class Controller extends Container {
                 this._shotArray.delete(shot);
                 console.log("размер массива выстрелов => " + this._shotArray.size);
 			}
-		});
+        });
+        
+        if (this._iterator >= 50){
+            //смена направления движения мобов у стен
+                if (MainContainer.INVADERS_CONTAINER.x +
+                    MainContainer.INVADERS_CONTAINER.width >= MainContainer.WIDTH - 20) {
+                    this._invaderOrientation = -10;
+                } else if (MainContainer.INVADERS_CONTAINER.x <= 20) {
+                    this._invaderOrientation = 10;
+                }
+                MainContainer.INVADERS_CONTAINER.x += this._invaderOrientation;
+                this._iterator = 0;
+            }
 	}
 }
