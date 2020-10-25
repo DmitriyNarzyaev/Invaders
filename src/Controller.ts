@@ -1,5 +1,6 @@
 import { Container } from "pixi.js";
 import Global from "./Global";
+import HitTest from "./HitTest";
 import MainContainer from "./MainContainer";
 import Shot from "./Shot";
 
@@ -13,6 +14,7 @@ export default class Controller extends Container {
     private _shotSpeed:number = 5;
     private _iterator:number = 0;
     private _invaderOrientation:number = 10;
+    private readonly _invadersContainerWidth:number = MainContainer.INVADERS_CONTAINER.width;
 
 	constructor() {
         super();
@@ -92,7 +94,18 @@ export default class Controller extends Container {
         
         this._shotArray.forEach((shot:Shot)=> {
 			shot.y -= this._shotSpeed;
-			
+			MainContainer.INVADERS_ARRAY.forEach((invader)=> {
+                if (
+                    HitTest.horizontal(invader, shot, MainContainer.INVADERS_CONTAINER) &&
+                    HitTest.vertical(invader, shot, MainContainer.INVADERS_CONTAINER)
+                ){
+                    console.log ("столкновение");
+                    this.removeChild(shot);
+                    MainContainer.INVADERS_CONTAINER.removeChild(invader);
+                    this._shotArray.delete(shot);
+                    MainContainer.INVADERS_ARRAY.delete(invader);
+                }
+            });
 			if (shot.y + shot.height <= 0) {
 				this.removeChild(shot);
                 this._shotArray.delete(shot);
@@ -102,14 +115,14 @@ export default class Controller extends Container {
         
         if (this._iterator >= 50){
             //смена направления движения мобов у стен
-                if (MainContainer.INVADERS_CONTAINER.x +
-                    MainContainer.INVADERS_CONTAINER.width >= MainContainer.WIDTH - 20) {
-                    this._invaderOrientation = -10;
-                } else if (MainContainer.INVADERS_CONTAINER.x <= 20) {
-                    this._invaderOrientation = 10;
-                }
-                MainContainer.INVADERS_CONTAINER.x += this._invaderOrientation;
-                this._iterator = 0;
+            if (MainContainer.INVADERS_CONTAINER.x +
+                this._invadersContainerWidth >= MainContainer.WIDTH - 20) {
+                this._invaderOrientation = -10;
+            } else if (MainContainer.INVADERS_CONTAINER.x <= 20) {
+                this._invaderOrientation = 10;
             }
+            MainContainer.INVADERS_CONTAINER.x += this._invaderOrientation;
+            this._iterator = 0;
+        }
 	}
 }
