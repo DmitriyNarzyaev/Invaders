@@ -2,6 +2,7 @@ import Container = PIXI.Container;
 import { Loader, Sprite } from "pixi.js";
 import Personage from "./Personage";
 import Button from "./Button";
+import Controller from "./Controller";
 
 export default class MainContainer extends Container {
 	public static readonly WIDTH:number = 1000;
@@ -15,6 +16,7 @@ export default class MainContainer extends Container {
 	private _jsonIsLoaded:Boolean;
 	private _backgroundIsLoaded:Boolean;
 	private _button:Button;
+	private _controller:Controller;
 
 	constructor() {
 		super();
@@ -84,6 +86,7 @@ export default class MainContainer extends Container {
 		this.initialBackground("background");
 		this.initialInvaders();
 		this.initialPlayer();
+		this.initialButtonListeners();
 	}
 
 	private initialInvaders():void {
@@ -117,5 +120,10 @@ export default class MainContainer extends Container {
 		this.addChild(MainContainer.PLAYER_1);
 		MainContainer.PLAYER_1.x = (MainContainer.WIDTH/2) - (MainContainer.PLAYER_1.width/2);													//fixme
 		MainContainer.PLAYER_1.y = MainContainer.HEIGHT - MainContainer.PLAYER_1.height-1;
+	}
+
+	private initialButtonListeners():void {
+		this._controller = new Controller;
+		this.addChild(this._controller);
 	}
 }
