@@ -7,6 +7,7 @@ export default class MainContainer extends Container {
 	public static readonly HEIGHT:number = 600;
 	public static INVADERS_ARRAY:Set<Personage> = new Set();
 	public static INVADERS_CONTAINER:Container;
+	public static PLAYER_1:Personage;
 	private _background:Sprite;
 	private _invader:Personage;
 	private _json:ILevel;
@@ -51,6 +52,7 @@ export default class MainContainer extends Container {
 		if (this._backgroundIsLoaded && this._jsonIsLoaded) {
 			this.initialBackground();
 			this.initialInvaders();
+			this.initialPlayer();
 		}
 	}
 
@@ -83,5 +85,12 @@ export default class MainContainer extends Container {
 			(MainContainer.WIDTH/2) -
 			((this._invader.width*8) +
 			(invaderGap*7))/2;
+	}
+
+	private initialPlayer():void {
+		MainContainer.PLAYER_1 = new Personage(this._json, "player", 0xffff00);
+		this.addChild(MainContainer.PLAYER_1);
+		MainContainer.PLAYER_1.x = (MainContainer.WIDTH/2) - (MainContainer.PLAYER_1.width/2);													//fixme
+		MainContainer.PLAYER_1.y = MainContainer.HEIGHT - MainContainer.PLAYER_1.height-1;
 	}
 }
