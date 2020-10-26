@@ -11,6 +11,7 @@ export default class MainContainer extends Container {
 	public static INVADERS_CONTAINER:Container;
 	public static PLAYER_1:Personage;
 	private _background:Sprite;
+	private _descriptionPic:Sprite;
 	private _invader:Personage;
 	private _json:ILevel;
 	private _jsonIsLoaded:Boolean;
@@ -28,6 +29,7 @@ export default class MainContainer extends Container {
         const loader:Loader = new Loader();
 		loader.add("background", "nightCityBackground.png");
 		loader.add("title", "title.png");
+		loader.add("startPic", "start_to_title.png");
 		loader.on("complete", ()=> {
 			this._backgroundIsLoaded = true;
 			this.checkLoadingsAndTryToStart();
@@ -60,17 +62,25 @@ export default class MainContainer extends Container {
 	}
 
 	private initialStartTitle():void {
-		this.initialBackground("title");
+		this.initialBackground("title", "startPic");
 		this.initialButton("START");
 	}
 
-	private initialBackground(pictureName:string):void {
+	private initialBackground(pictureName:string, descriptionPicName:string):void {
 		this._background = Sprite.from(pictureName);
 		this.addChild(this._background);
+
+		if (descriptionPicName != "") {
+			this._descriptionPic = Sprite.from(descriptionPicName);
+			this.addChild(this._descriptionPic);
+			this._descriptionPic.x = (this._background.width - this._descriptionPic.width)/2;
+			this._descriptionPic.y = this._background.height - this._descriptionPic.height*1.4;
+		}
 	}
 
 	private removeBackground():void {
 		this.removeChild(this._background);
+		this.removeChild(this._descriptionPic);
 		this.removeChild(this._button);
 	}
 
@@ -83,7 +93,7 @@ export default class MainContainer extends Container {
 
 	private initialGame():void {
 		this.removeBackground();
-		this.initialBackground("background");
+		this.initialBackground("background", "");
 		this.initialInvaders();
 		this.initialPlayer();
 		this.initialButtonListeners();

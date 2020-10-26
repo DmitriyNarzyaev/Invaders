@@ -11,8 +11,8 @@ export default class Button extends Container {
         const button:PIXI.Graphics = new PIXI.Graphics;
         button.buttonMode = true;
         button.interactive = true;
-        button.beginFill(0x2222ff, 1);
-        button.drawRoundedRect(0, 0, 120, 30, 10);
+        button.beginFill(0x3535ff, 1);
+        button.drawRoundedRect(0, 0, 120, 40, 10);
         this.addChild(button);
 
         let textStyle:TextStyle = new PIXI.TextStyle ({
