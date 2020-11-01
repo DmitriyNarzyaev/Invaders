@@ -3,6 +3,9 @@ import { Loader, Sprite } from "pixi.js";
 import Personage from "./Personage";
 import Button from "./Button";
 import Controller from "./Controller";
+import Global from "./Global";
+import Shot from "./Shot";
+import HitTest from "./HitTest";
 
 export default class MainContainer extends Container {
 	public static readonly WIDTH:number = 1000;
@@ -18,6 +21,13 @@ export default class MainContainer extends Container {
 	private _backgroundIsLoaded:Boolean;
 	private _button:Button;
 	private _controller:Controller;
+	private _iterator:number = 0;
+	private _shotArray:Set<Shot> = new Set();
+	private _border:number = 10;
+	public static SHOT_SWITCHER:boolean = false;
+    private _shotSpeed:number = 5;
+    private _invaderOrientation:number = 10;
+    private _invadersContainerWidth:number;
 
 	constructor() {
 		super();
@@ -30,6 +40,7 @@ export default class MainContainer extends Container {
 		loader.add("background", "nightCityBackground.png");
 		loader.add("title", "title.png");
 		loader.add("startPic", "start_to_title.png");
+		loader.add("winPic", "win_to_title.png");
 		loader.on("complete", ()=> {
 			this._backgroundIsLoaded = true;
 			this.checkLoadingsAndTryToStart();
@@ -66,6 +77,11 @@ export default class MainContainer extends Container {
 		this.initialButton("START");
 	}
 
+	private initialWinTitle():void {
+		this.initialBackground("title", "winPic");
+		this.initialButton("RESTART");
+	}
+
 	private initialBackground(pictureName:string, descriptionPicName:string):void {
 		this._background = Sprite.from(pictureName);
 		this.addChild(this._background);
@@ -97,6 +113,9 @@ export default class MainContainer extends Container {
 		this.initialInvaders();
 		this.initialPlayer();
 		this.initialButtonListeners();
+
+		this._invadersContainerWidth = MainContainer.INVADERS_CONTAINER.width;
+		Global.PIXI_APP.ticker.add(this.ticker, this);
 	}
 
 	private initialInvaders():void {
@@ -132,8 +151,74 @@ export default class MainContainer extends Container {
 		MainContainer.PLAYER_1.y = MainContainer.HEIGHT - MainContainer.PLAYER_1.height-1;
 	}
 
+	private initialShot():void {
+		let shot:Shot = new Shot;
+			this.addChild(shot);
+			this._shotArray.add(shot);
+			shot.x = MainContainer.PLAYER_1.x + (MainContainer.PLAYER_1.width - shot.width)/2 ;
+            shot.y = MainContainer.PLAYER_1.y - shot.height;
+	}
+
 	private initialButtonListeners():void {
 		this._controller = new Controller;
 		this.addChild(this._controller);
 	}
+
+	private ticker():void {
+        this._iterator += 1;
+
+        //******BUTTON_RIGHT
+		if ((MainContainer.PLAYER_1.x + MainContainer.PLAYER_1.width <= MainContainer.WIDTH - this._border)
+		&& (Controller.BUTTON_RIGHT == true)) {
+            MainContainer.PLAYER_1.x += 2;
+        }
+
+        //******BUTTON_LEFT
+		if (MainContainer.PLAYER_1.x >= this._border && Controller.BUTTON_LEFT == true) {
+            MainContainer.PLAYER_1.x -= 2;
+        }
+        
+        //******BUTTON_UP
+		if (Controller.BUTTON_UP == true && MainContainer.SHOT_SWITCHER == true) {
+			this.initialShot();
+			MainContainer.SHOT_SWITCHER = false;
+        }
+        
+        this._shotArray.forEach((shot:Shot)=> {
+			shot.y -= this._shotSpeed;
+			MainContainer.INVADERS_ARRAY.forEach((invader)=> {
+                if (
+                    HitTest.horizontal(invader, shot, MainContainer.INVADERS_CONTAINER) &&
+                    HitTest.vertical(invader, shot, MainContainer.INVADERS_CONTAINER)
+                ){
+                    this.removeChild(shot);
+                    MainContainer.INVADERS_CONTAINER.removeChild(invader);
+                    this._shotArray.delete(shot);
+                    MainContainer.INVADERS_ARRAY.delete(invader);
+                    if (MainContainer.INVADERS_ARRAY.size <= 0) {
+                        console.log("********************************");
+						this.initialWinTitle();
+						Global.PIXI_APP.ticker.remove(this.ticker, this);
+						this._shotArray.clear();
+                    }
+                }
+            });
+			if (shot.y + shot.height <= 0) {
+				this.removeChild(shot);
+                this._shotArray.delete(shot);
+			}
+        });
+        
+        if (this._iterator >= 50){
+            //смена направления движения мобов у стен
+            if (MainContainer.INVADERS_CONTAINER.x +
+                this._invadersContainerWidth >= MainContainer.WIDTH - 20) {
+                this._invaderOrientation = -10;
+            } else if (MainContainer.INVADERS_CONTAINER.x <= 20) {
+                this._invaderOrientation = 10;
+            }
+            MainContainer.INVADERS_CONTAINER.x += this._invaderOrientation;
+            this._iterator = 0;
+        }
+    }
 }
